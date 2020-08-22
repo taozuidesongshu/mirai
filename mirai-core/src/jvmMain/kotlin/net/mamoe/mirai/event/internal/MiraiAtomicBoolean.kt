@@ -9,16 +9,10 @@
 
 package net.mamoe.mirai.event.internal
 
-import net.mamoe.mirai.event.Event
 import net.mamoe.mirai.event.Listener
 import net.mamoe.mirai.utils.LockFreeLinkedList
-import net.mamoe.mirai.utils.LockFreeLinkedListNode
-import net.mamoe.mirai.utils.isRemoved
-import net.mamoe.mirai.utils.MiraiInternalAPI
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.reflect.KClass
-
 
 internal actual class MiraiAtomicBoolean actual constructor(initial: Boolean) {
     private val delegate: AtomicBoolean = AtomicBoolean(initial)
@@ -33,42 +27,3 @@ internal actual class MiraiAtomicBoolean actual constructor(initial: Boolean) {
             delegate.set(value)
         }
 }
-
-internal actual object GlobalEventListeners {
-    private val map: Map<Listener.EventPriority, LockFreeLinkedList<ListenerNode>>
-
-    init {
-        val map = EnumMap<Listener.EventPriority, LockFreeLinkedList<ListenerNode>>(Listener.EventPriority::class.java)
-        Listener.EventPriority.values().forEach {
-            map[it] = LockFreeLinkedList()
-        }
-        this.map = map
-    }
-
-    actual operator fun get(priority: Listener.EventPriority): LockFreeLinkedList<ListenerNode> = map[priority]!!
-
-}
-
-/*
-internal actual class EventListeners<E : Event> actual constructor(clazz: KClass<E>) :
-    LockFreeLinkedList<Listener<E>>() {
-    @Suppress("UNCHECKED_CAST", "UNSUPPORTED", "NO_REFLECTION_IN_CLASS_PATH")
-    actual val supertypes: Set<KClass<out Event>> by lazy {
-        val supertypes = mutableSetOf<KClass<out Event>>()
-
-        fun addSupertypes(klass: KClass<out Event>) {
-            klass.supertypes.forEach {
-                val classifier = it.classifier as? KClass<out Event>
-                if (classifier != null) {
-                    supertypes.add(classifier)
-                    addSupertypes(classifier)
-                }
-            }
-        }
-        addSupertypes(clazz)
-
-        supertypes
-    }
-
-}
- */
